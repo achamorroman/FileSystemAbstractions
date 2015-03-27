@@ -12,9 +12,13 @@ namespace FileSystemAbstractions
     public class FileLocatorTests
     {
 
+        private const string AllFilesSearchPattern = "*.*";
+        private IFileSystem _mockedFileSystem;
+
         [TestFixtureSetUp]
         public void SetUp()
         {
+            _mockedFileSystem = GetMockedFileSystem();
         }
 
         [TestFixtureTearDown]
@@ -38,10 +42,9 @@ namespace FileSystemAbstractions
         {
             //Arrange
             const string notExistingDirectory = "C:\notExistingDirectory";
-            var fileSystem = GetMockedFileSystem();
 
             //Act - Assert
-            var sut = new FileLocator(fileSystem, notExistingDirectory, "*.*", ".txt");
+            var sut = new FileLocator(_mockedFileSystem, notExistingDirectory, AllFilesSearchPattern, ".txt");
         }
 
         [Test]
@@ -49,10 +52,9 @@ namespace FileSystemAbstractions
         {
             //Arrange
             const string searchRootFolder = @"C:\Demo";
-            var fileSystem = GetMockedFileSystem();
 
             //Act
-            var sut = new FileLocator(fileSystem, searchRootFolder, "*.*", ".txt");
+            var sut = new FileLocator(_mockedFileSystem, searchRootFolder, AllFilesSearchPattern, ".txt");
 
             //Assert
             Assert.IsNotNull(sut);
@@ -63,8 +65,7 @@ namespace FileSystemAbstractions
         {
             //Arrange
             const string searchRootFolder = @"C:\demo";
-            var fileSystem = GetMockedFileSystem();
-            var sut = new FileLocator(fileSystem, searchRootFolder, "*.*", ".js");
+            var sut = new FileLocator(_mockedFileSystem, searchRootFolder, AllFilesSearchPattern, ".js");
             const int expectedFiles = 2;
 
             //Act
@@ -80,8 +81,7 @@ namespace FileSystemAbstractions
         {
             //Arrange
             const string searchRootFolder = @"C:\demo";
-            var fileSystem = GetMockedFileSystem();
-            var sut = new FileLocator(fileSystem, searchRootFolder, "*.*", ".dat");
+            var sut = new FileLocator(_mockedFileSystem, searchRootFolder, AllFilesSearchPattern, ".dat");
 
             //Act
             var files = sut.GetSearchResult();
