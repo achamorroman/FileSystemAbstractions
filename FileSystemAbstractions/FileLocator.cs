@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 
 namespace FileSystemAbstractions
@@ -10,41 +11,51 @@ namespace FileSystemAbstractions
         private readonly string _searchDirectory;
         private readonly string _searchPattern;
         private readonly string _fileExtension;
+        private readonly IFileSystem _fileSystem;
 
-        public FileLocator(String searchDirectory, string searchPattern, string fileExtension)
+        public FileLocator(IFileSystem fileSystem, String searchDirectory, string searchPattern, string fileExtension)
         {
+            if (fileSystem == null) throw new ArgumentNullException("fileSystem");
             if (String.IsNullOrEmpty(searchDirectory)) throw new ArgumentNullException("searchDirectory");
             if (string.IsNullOrEmpty(searchPattern)) throw new ArgumentException("searchString");
             if (string.IsNullOrEmpty(fileExtension)) throw new ArgumentException("fileExtension");
 
-            if (!Directory.Exists(searchDirectory))
+            if (!fileSystem.Directory.Exists(searchDirectory))
                 throw new ArgumentException("Root folder doesn't exists", "searchDirectory");
 
             _searchDirectory = Path.GetFullPath(searchDirectory);
             _searchPattern = searchPattern;
             _fileExtension = fileExtension;
+            _fileSystem = fileSystem;
         }
 
-        public IEnumerable<MyFile> GetSearchResult()
+        public FileLocator(String searchDirectory, string searchPattern, string fileExtension)
+            : this(new FileSystem(), searchDirectory, searchPattern, fileExtension) { }
+
+        public IEnumerable<MyFileInfo> GetSearchResult()
         {
-            var searchDirectoryInfo = new DirectoryInfo(_searchDirectory);
+            var searchDirectoryInfo = _fileSystem.DirectoryInfo.FromDirectoryName(_searchDirectory);
             var matchingFiles = GetMatchingFiles(searchDirectoryInfo);
 
+            if (!matchingFiles.Any()) return new List<MyFileInfo>();
 
-            if (!matchingFiles.Any()) return new List<MyFile>();
+            var files = mapToMyFiles(matchingFiles);
+            return files;
+        }
 
-            var files = new List<MyFile>();
-
+        private static List<MyFileInfo> mapToMyFiles(IEnumerable<FileInfoBase> matchingFiles)
+        {
+            var files = new List<MyFileInfo>();
             foreach (var file in matchingFiles)
             {
-                files.Add(new MyFile() { FileName = file.Name, DirectoryName = file.DirectoryName });
+                files.Add(new MyFileInfo() { FileName = file.Name, DirectoryName = file.DirectoryName });
             }
             return files;
         }
 
-        private IEnumerable<FileInfo> GetMatchingFiles(DirectoryInfo viewsRootDirectoryInfo)
+        private IEnumerable<FileInfoBase> GetMatchingFiles(DirectoryInfoBase searchDirectoryInfo)
         {
-            var fileList = viewsRootDirectoryInfo.GetFiles(_searchPattern, SearchOption.AllDirectories);
+            var fileList = searchDirectoryInfo.GetFiles(_searchPattern, SearchOption.AllDirectories);
             var matchingFiles = from file in fileList
                                 where file.Extension == _fileExtension
                                 select file;
@@ -52,11 +63,4 @@ namespace FileSystemAbstractions
             return matchingFiles;
         }
     }
-
-    public class MyFile
-    {
-        public String FileName { get; set; }
-        public String DirectoryName { get; set; }
-    }
-
 }
