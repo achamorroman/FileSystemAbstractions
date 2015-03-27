@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FileSystemAbstractions
 {
@@ -31,6 +29,7 @@ namespace FileSystemAbstractions
         {
             var searchDirectoryInfo = new DirectoryInfo(_searchDirectory);
             var matchingFiles = GetMatchingFiles(searchDirectoryInfo);
+
 
             if (!matchingFiles.Any()) return new List<MyFile>();
 
