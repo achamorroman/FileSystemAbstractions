@@ -107,7 +107,7 @@ namespace FileSystemAbstractions
                                           {@"c:\root\document.doc", new MockFileData("document text")},
                                           {@"c:\root\excelSheet.xls", new MockFileData("excel data")},
                                           {@"c:\root\folder1\myDoc.js", new MockFileData("more js")},
-                                          {@"c:\root\folder2\otherdoc.doc", new MockFileData("more js")}
+                                          {@"c:\root\folder2\otherdoc.doc", new MockFileData("text")}
                                       });
         }
     }
