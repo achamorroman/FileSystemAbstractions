@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace FileSystemAbstractions
 {
@@ -16,7 +17,7 @@ namespace FileSystemAbstractions
         public FileLocator(IFileSystem fileSystem, String searchDirectory, string searchPattern, string fileExtension)
         {
             if (fileSystem == null) throw new ArgumentNullException("fileSystem");
-            if (String.IsNullOrEmpty(searchDirectory)) throw new ArgumentNullException("searchDirectory");
+            if (string.IsNullOrEmpty(searchDirectory)) throw new ArgumentException("searchDirectory");
             if (string.IsNullOrEmpty(searchPattern)) throw new ArgumentException("searchString");
             if (string.IsNullOrEmpty(fileExtension)) throw new ArgumentException("fileExtension");
 
@@ -45,12 +46,14 @@ namespace FileSystemAbstractions
 
         private static List<MyFileInfo> mapToMyFiles(IEnumerable<FileInfoBase> matchingFiles)
         {
-            var files = new List<MyFileInfo>();
-            foreach (var file in matchingFiles)
-            {
-                files.Add(new MyFileInfo() { FileName = file.Name, DirectoryName = file.DirectoryName });
-            }
-            return files;
+            var myFiles = (from file in matchingFiles
+                           select new MyFileInfo()
+                           {
+                               FileName = file.Name,
+                               DirectoryName = file.DirectoryName
+                           }).ToList();
+
+            return myFiles;
         }
 
         private IEnumerable<FileInfoBase> GetMatchingFiles(DirectoryInfoBase searchDirectoryInfo)

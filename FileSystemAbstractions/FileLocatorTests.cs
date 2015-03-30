@@ -19,9 +19,7 @@ namespace FileSystemAbstractions
         }
 
         [TestFixtureTearDown]
-        public void TearDown()
-        {
-        }
+        public void TearDown() { }
 
         [Test]
         public void When_FilesFound_Expected_ResultsWithMyFileInfo()
@@ -30,6 +28,39 @@ namespace FileSystemAbstractions
             const string fileExtension = ".js";
             const int expectedFiles = 2;
             var sut = new FileLocator(_mockedFileSystem, RootFolder, AllFilesSearchPattern, fileExtension);
+
+            //Act
+            var files = sut.GetSearchResult();
+
+            //Assert
+            Assert.AreEqual(expectedFiles, files.Count());
+            Assert.IsInstanceOf<MyFileInfo>(files.First());
+        }
+
+        [Test]
+        public void When_FilesNotFound_Expected_EmptyResults()
+        {
+            //Arrange
+            const string fileExtension = ".dat";
+            var sut = new FileLocator(_mockedFileSystem, RootFolder, AllFilesSearchPattern, fileExtension);
+
+            //Act
+            var files = sut.GetSearchResult();
+
+            //Assert
+            Assert.IsEmpty(files);
+        }
+
+        [Test]
+        public void When_RootFolderProvidedAndExistsFiles_Expected_ResultsWithMyFileInfo()
+        {
+            //Arrange
+            const string rootFolder = @"C:\root\folder2\";
+            const string fileExtension = ".txt";
+            const string searchPattern = "*read*";
+            const int expectedFiles = 1;
+
+            var sut = new FileLocator(_mockedFileSystem, rootFolder, searchPattern, fileExtension);
 
             //Act
             var files = sut.GetSearchResult();
@@ -55,21 +86,6 @@ namespace FileSystemAbstractions
             //Assert
             Assert.AreEqual(expectedFiles, files.Count());
             Assert.IsInstanceOf<MyFileInfo>(files.First());
-        }
-
-
-        [Test]
-        public void When_FilesNotFound_Expected_EmptyResults()
-        {
-            //Arrange
-            const string fileExtension = ".dat";
-            var sut = new FileLocator(_mockedFileSystem, RootFolder, AllFilesSearchPattern, fileExtension);
-
-            //Act
-            IEnumerable<MyFileInfo> files = sut.GetSearchResult();
-
-            //Assert
-            Assert.IsEmpty(files);
         }
 
         [Test]
@@ -102,12 +118,14 @@ namespace FileSystemAbstractions
         {
             return new MockFileSystem(new Dictionary<string, MockFileData>
                                       {
-                                          {@"c:\myfile.txt", new MockFileData("Testing is meh.")},
-                                          {@"c:\root\jQuery.js", new MockFileData("some js")},
-                                          {@"c:\root\document.doc", new MockFileData("document text")},
-                                          {@"c:\root\excelSheet.xls", new MockFileData("excel data")},
-                                          {@"c:\root\folder1\myDoc.js", new MockFileData("more js")},
-                                          {@"c:\root\folder2\otherdoc.doc", new MockFileData("text")}
+                                          {@"C:\myfile.txt", new MockFileData("Testing is meh.")},
+                                          {@"C:\root\jQuery.js", new MockFileData("some js")},
+                                          {@"C:\root\document.doc", new MockFileData("document text")},
+                                          {@"C:\root\excelSheet.xls", new MockFileData("excel data")},
+                                          {@"C:\root\folder1\myDoc.js", new MockFileData("more js")},
+                                          {@"C:\root\folder2\otherdoc.doc", new MockFileData("text")},
+                                          {@"C:\root\folder2\otherExcel.xls", new MockFileData("excel data")},
+                                          {@"C:\root\folder2\readme.txt", new MockFileData("text")}
                                       });
         }
     }
